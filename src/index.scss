@@ -1,0 +1,33 @@
+body,
+html {
+    margin: 0;
+    display: flex;
+}
+
+p {
+    margin: 0;
+}
+
+#error-container {
+    position: fixed;
+
+    &.shown {
+        top: 0px;
+        left: 0px;
+        width: 100vw;
+        height: 100vh;
+        background: white;
+    }
+
+    &.hidden {
+        display: none;
+    }
+
+    #error-message {
+        display: inline-block;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+}
