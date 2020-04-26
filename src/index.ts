@@ -1,23 +1,18 @@
-import * as THREE from 'three';
 import './index.scss';
-import WEBGL from './WEBGL';
+import * as Sky3D from './util/sky3d';
+import { WEBGL } from './WEBGL';
 
-let scene = new THREE.Scene();
-let camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1000);
-let renderer = new THREE.WebGLRenderer();
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
+let scene = new Sky3D.Scene(window.innerWidth, window.innerHeight);
+scene.canvas.id = 'sky';
+document.body.appendChild(scene.canvas);
 
-let geometry = new THREE.BoxGeometry();
-let material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-let cube = new THREE.Mesh(geometry, material);
-scene.add(cube);
+let camera = new Sky3D.Camera();
 
-camera.position.z = 5;
+// scene.add(new Sky3D.Mesh());
 
 function animate() {
     requestAnimationFrame(animate);
-    renderer.render(scene, camera);
+    scene.render(camera);
 }
 if (WEBGL.isWebGLAvailable()) {
     animate();

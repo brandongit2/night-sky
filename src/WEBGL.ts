@@ -1,6 +1,6 @@
 // Check if WebGL is available
 
-let WEBGL = {
+const WEBGL = {
     isWebGLAvailable: function () {
         try {
             let canvas = document.createElement('canvas');
@@ -38,4 +38,4 @@ let WEBGL = {
     }
 };
 
-export default WEBGL;
+export { WEBGL };
