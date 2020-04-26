@@ -1,19 +1,28 @@
 import * as THREE from 'three';
 import './index.scss';
 import WEBGL from './WEBGL';
+import { skyGrid } from './skyGrid';
 
 let scene = new THREE.Scene();
-let camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1000);
+let camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.rotation.order = 'YXZ';
+
 let renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(window.devicePixelRatio);
 document.body.appendChild(renderer.domElement);
 
-let geometry = new THREE.BoxGeometry();
-let material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-let cube = new THREE.Mesh(geometry, material);
-scene.add(cube);
+let gridLines = skyGrid();
+for (let line of gridLines) {
+    scene.add(line);
+}
 
-camera.position.z = 5;
+window.addEventListener('mousemove', (evt) => {
+    if (evt.buttons === 1) {
+        camera.rotation.x += evt.movementY / 1500;
+        camera.rotation.y += evt.movementX / 1500;
+    }
+})
 
 function animate() {
     requestAnimationFrame(animate);
