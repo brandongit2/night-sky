@@ -10,14 +10,12 @@ p {
 
 #error-container {
     position: fixed;
-
-    &.shown {
-        top: 0px;
-        left: 0px;
-        width: 100vw;
-        height: 100vh;
-        background: white;
-    }
+    z-index: 3;
+    top: 0px;
+    left: 0px;
+    width: 100vw;
+    height: 100vh;
+    background: white;
 
     &.hidden {
         display: none;
@@ -29,5 +27,19 @@ p {
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
+    }
+}
+
+#scroll-overlay {
+    position: fixed;
+    z-index: 2;
+    top: 0px;
+    left: 0px;
+    width: 110vw;
+    height: 100vh;
+    overflow: auto;
+
+    #scroll-content {
+        height: calc(100vh * 3);
     }
 }

@@ -1,7 +1,7 @@
-import * as THREE from 'three';
 import './index.scss';
-import WEBGL from './WEBGL';
 import { skyGrid } from './skyGrid';
+import WEBGL from './WEBGL';
+import * as THREE from 'three';
 import { Vector2 } from 'three';
 
 let scene = new THREE.Scene();
@@ -25,18 +25,22 @@ function rotCam(dx: number, dy: number) { // Rotates camera without going past -
 }
 
 let panVelocity: Vector2;
-let panVelocities: Vector2[] = [];
+let panVelocities: Array<{ vec: Vector2, time: number }> = [];
 let curTime: number;
+let panSpeed = 1300;
 window.addEventListener('mousemove', (evt) => {
     if (evt.buttons === 1) {
         curTime = Date.now();
-        rotCam(evt.movementY / 1500, evt.movementX / 1500);
-        panVelocities.push(new Vector2(evt.movementY / 1500, evt.movementX / 1500));
+        rotCam(evt.movementY / panSpeed / camera.zoom, evt.movementX / panSpeed / camera.zoom);
+        panVelocities.push({
+            vec: new Vector2(evt.movementY / panSpeed / camera.zoom, evt.movementX / panSpeed / camera.zoom),
+            time: Date.now()
+        });
     }
 });
 let inertia: NodeJS.Timeout;
 let doInertia = false;
-let inertiaFactor = 0.02; // Smaller number -> takes longer to stop
+let inertiaFactor = 0.03; // Smaller number -> takes longer to stop
 window.addEventListener('mousedown', () => {
     panVelocities = [];
     doInertia = false;
@@ -49,20 +53,18 @@ window.addEventListener('mouseup', () => {
 
     // Get average speed of mouse movement
     let panSpeed = panVelocities.slice(-numSamples)
-        .map(v => Math.sqrt(v.x ** 2 + v.y ** 2))
+        .filter(({ time: t }) => Date.now() - t < 50)
+        .map(({ vec: v }) => Math.sqrt(v.x ** 2 + v.y ** 2))
         .reduce((total, i) => total + i, 0) / numSamples;
 
-    panVelocity = panVelocities[panVelocities.length - 1].normalize().multiplyScalar(panSpeed);
-    console.log(panSpeed);
+    panVelocity = panVelocities[panVelocities.length - 1].vec.normalize().multiplyScalar(panSpeed);
 
     let velDifference = panVelocity.clone().multiplyScalar(inertiaFactor);
-    // console.log(Date.now() - curTime);
-    if (Date.now() - curTime > 50) return;
 
     doInertia = true;
     inertia = setInterval(() => {
         panVelocity.sub(velDifference);
-        velDifference.multiplyScalar(0.981); // Makes slowing down a lot smoother
+        velDifference.multiplyScalar(0.971); // Makes slowing down a lot smoother
         if (
             (velDifference.x > 0 && panVelocity.x < 0)
             || (velDifference.x < 0 && panVelocity.x > 0)
@@ -76,6 +78,17 @@ window.addEventListener('mouseup', () => {
         }
     }, 10);
 });
+
+let scrollOverlay = document.getElementById('scroll-overlay');
+let scrollContent = document.getElementById('scroll-content');
+let scrollMin = Math.log(0.4) / Math.log(1.003);
+let scrollMax = Math.log(40) / Math.log(1.003);
+scrollOverlay.scrollTo(0, scrollMax);
+scrollContent.style.height = scrollMax + window.innerHeight - scrollMin + 'px';
+setInterval(() => {
+    camera.zoom = 1.003 ** (scrollMax - scrollOverlay.scrollTop);
+    camera.updateProjectionMatrix();
+}, 10);
 
 function animate() {
     requestAnimationFrame(animate);
