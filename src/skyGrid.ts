@@ -48,7 +48,7 @@ export function skyGrid() {
     thickMat.depthTest = false;
 
     let lines = [];
-    let numLongLines = 36; // Longitude lines, must be a multiple of 4
+    let numLongLines = 24; // Longitude lines, must be a multiple of 4
     for (let i = 0; i < numLongLines; i++) {
         lines.push(
             i % (numLongLines / 4) === 0
