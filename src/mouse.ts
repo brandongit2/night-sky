@@ -58,8 +58,11 @@ export function mouse() {
     });
 
     window.addEventListener('mouseup', () => {
+        // If there are less than 10 samples for the whole mouse movement, don't use 10
+        let numSamples = panVelocities.length < 10 ? panVelocities.length : 10;
+
         // Get average speed of mouse movement
-        panVelocities = panVelocities.filter(({ time: t }) => Date.now() - t < 50);
+        panVelocities = panVelocities.slice(-numSamples).filter(({ time: t }) => Date.now() - t < 100);
         if (panVelocities.length === 0) return;
         let panSpeed = panVelocities
             .map(({ vec: v }) => Math.sqrt(v.x ** 2 + v.y ** 2))
@@ -92,14 +95,23 @@ export function mouse() {
     let scrollContent = document.getElementById('scroll-content');
     let scrollMin = Math.log(0.4) / Math.log(1.003);
     let scrollMax = Math.log(40) / Math.log(1.003);
-    scrollOverlay.scrollTo(0, scrollMax);
     scrollContent.style.height = scrollMax + window.innerHeight - scrollMin + 'px';
+    scrollOverlay.scrollTo(0, scrollMax);
     setInterval(() => {
         this.camera.zoom = 1.003 ** (scrollMax - scrollOverlay.scrollTop);
         this.camera.updateProjectionMatrix();
     }, 10);
 }
 
-export function onRender() {
+export function mouseOnRender() {
     if (doInertia) rotCam.call(this, panVelocity.x, panVelocity.y);
+}
+
+export function mouseOnResize() {
+    let scrollOverlay = document.getElementById('scroll-overlay');
+    let scrollContent = document.getElementById('scroll-content');
+    let scrollMin = Math.log(0.4) / Math.log(1.003);
+    let scrollMax = Math.log(40) / Math.log(1.003);
+    scrollContent.style.height = scrollMax + window.innerHeight - scrollMin + 'px';
+    scrollOverlay.scrollTo(0, Math.log(this.camera.zoom) / Math.log(1.003) + scrollOverlay.scrollTop);
 }

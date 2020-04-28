@@ -3,6 +3,19 @@ import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry';
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial';
 import { Vector2 } from 'three';
 
+let thinMat = new LineMaterial({
+    color: 0x777777,
+    linewidth: 1,
+    resolution: new Vector2(window.innerWidth, window.innerHeight)
+});
+thinMat.depthTest = false;
+let thickMat = new LineMaterial({
+    color: 0xaaaaaa,
+    linewidth: 2,
+    resolution: new Vector2(window.innerWidth, window.innerHeight)
+});
+thickMat.depthTest = false;
+
 export function skyGrid() {
     let verts: number[] = [];
     let numVerts = 100; // Number of vertices in half a circle of the grid line
@@ -34,19 +47,6 @@ export function skyGrid() {
     let latGeom = new LineGeometry();
     latGeom.setPositions(verts);
 
-    let thinMat = new LineMaterial({
-        color: 0x777777,
-        linewidth: 1,
-        resolution: new Vector2(window.innerWidth, window.innerHeight)
-    });
-    thinMat.depthTest = false;
-    let thickMat = new LineMaterial({
-        color: 0xaaaaaa,
-        linewidth: 2,
-        resolution: new Vector2(window.innerWidth, window.innerHeight)
-    });
-    thickMat.depthTest = false;
-
     let lines = [];
     let numLongLines = 24; // Longitude lines, must be a multiple of 4
     for (let i = 0; i < numLongLines; i++) {
@@ -70,4 +70,9 @@ export function skyGrid() {
     }
 
     return lines;
+}
+
+export function skyGridOnResize() {
+    thinMat.resolution.set(window.innerWidth, window.innerHeight);
+    thickMat.resolution.set(window.innerWidth, window.innerHeight);
 }

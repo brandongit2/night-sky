@@ -1,14 +1,19 @@
+import { coordinateLabels } from './coordinateLabels';
 import './index.scss';
-import { mouse, onRender } from './mouse';
-import { skyGrid } from './skyGrid';
+import { mouse, mouseOnRender, mouseOnResize } from './mouse';
+import { skyGrid, skyGridOnResize } from './skyGrid';
 import WEBGL from './WEBGL';
-import { TextLabel } from './TextLabel';
 import * as THREE from 'three';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
+import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader';
 
 class NightSky {
     static scene: THREE.Scene;
     static camera: THREE.PerspectiveCamera;
     static renderer: THREE.WebGLRenderer;
+    static composer: EffectComposer;
 
     static init() {
         this.scene = new THREE.Scene();
@@ -20,10 +25,29 @@ class NightSky {
         this.renderer.setPixelRatio(window.devicePixelRatio);
         document.body.appendChild(this.renderer.domElement);
 
+        let renderPass = new RenderPass(this.scene, this.camera);
+        let fxaaPass = new ShaderPass(FXAAShader);
+        // @ts-ignore
+        fxaaPass.material.uniforms.resolution.value.x = 1 / (window.innerWidth * window.devicePixelRatio);
+        // @ts-ignore
+        fxaaPass.material.uniforms.resolution.value.y = 1 / (window.innerHeight * window.devicePixelRatio);
+        this.composer = new EffectComposer(this.renderer);
+        this.composer.addPass(renderPass);
+        this.composer.addPass(fxaaPass);
+
         window.addEventListener('resize', () => {
             this.camera.aspect = window.innerWidth / window.innerHeight;
             this.camera.updateProjectionMatrix();
             this.renderer.setSize(window.innerWidth, window.innerHeight);
+            this.composer.setSize(window.innerWidth, window.innerHeight);
+
+            // @ts-ignore
+            fxaaPass.material.uniforms.resolution.value.x = 1 / (window.innerWidth * window.devicePixelRatio);
+            // @ts-ignore
+            fxaaPass.material.uniforms.resolution.value.y = 1 / (window.innerHeight * window.devicePixelRatio);
+
+            skyGridOnResize();
+            mouseOnResize();
         });
 
         let gridLines = skyGrid();
@@ -31,16 +55,15 @@ class NightSky {
             this.scene.add(line);
         }
 
-        new TextLabel(100, 100, 'hello world', { color: 'aaaaaa' });
-
         mouse.call(this);
 
         let animate = () => {
             requestAnimationFrame(animate);
 
-            onRender.call(this);
+            mouseOnRender.call(this);
+            coordinateLabels.call(this);
 
-            this.renderer.render(this.scene, this.camera);
+            this.composer.render();
         }
         if (WEBGL.isWebGLAvailable()) {
             animate();
