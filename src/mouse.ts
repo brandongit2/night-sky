@@ -1,6 +1,7 @@
 // Handles panning and zooming of camera
 
-import { Vector2 } from 'three';
+import * as THREE from 'three';
+import { Ray, Vector2 } from 'three';
 
 let doInertia = false;
 let panVelocity: Vector2;
@@ -26,6 +27,7 @@ export function mouse() {
             });
         }
     });
+
     let inertia: NodeJS.Timeout;
     let inertiaFactor = 0.03; // Smaller number -> takes longer to stop
     window.addEventListener('mousedown', () => {
@@ -66,6 +68,7 @@ export function mouse() {
         }, 10);
     });
 
+    // Do scrolling
     let scrollOverlay = document.getElementById('scroll-overlay');
     let scrollContent = document.getElementById('scroll-content');
     let scrollMin = Math.log(0.4) / Math.log(1.003);
@@ -76,6 +79,22 @@ export function mouse() {
         this.camera.zoom = 1.003 ** (scrollMax - scrollOverlay.scrollTop);
         this.camera.updateProjectionMatrix();
     }, 10);
+
+    // Mouse picking via raycasting
+    let sphereGeom = new THREE.SphereBufferGeometry(0.01, 12, 6);
+    let sphereMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+    let sphere = new THREE.Mesh(sphereGeom, sphereMat);
+    this.scene.add(sphere);
+
+    window.addEventListener('mousemove', (evt) => {
+        let pos = [
+            2 * evt.clientX / window.innerWidth - 1,
+            -(2 * evt.clientY / window.innerHeight - 1)
+        ];
+        let ray = new Ray();
+        ray.direction.set(pos[0], pos[1], -1).unproject(this.camera).normalize();
+        sphere.position.set(ray.direction.x, ray.direction.y, ray.direction.z);
+    });
 }
 
 export function onRender() {
