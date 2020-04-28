@@ -16,8 +16,8 @@ export function mouse() {
     let panVelocities: Array<{ vec: Vector2, time: number }> = [];
     let panSpeed = 1300;
     // a and b are parameters which have been tweaked precisely! Do not touch!
-    let a = 20;
-    let b = 1.05;
+    const a = 20;
+    const b = 1.05;
     window.addEventListener('mousemove', (evt) => {
         if (evt.buttons === 1) {
             let pos = [
@@ -58,14 +58,12 @@ export function mouse() {
     });
 
     window.addEventListener('mouseup', () => {
-        // If there are less than 10 samples for the whole mouse movement, don't use 10
-        let numSamples = panVelocities.length < 10 ? panVelocities.length : 10;
-
         // Get average speed of mouse movement
-        let panSpeed = panVelocities.slice(-numSamples)
-            .filter(({ time: t }) => Date.now() - t < 50)
+        panVelocities = panVelocities.filter(({ time: t }) => Date.now() - t < 50);
+        if (panVelocities.length === 0) return;
+        let panSpeed = panVelocities
             .map(({ vec: v }) => Math.sqrt(v.x ** 2 + v.y ** 2))
-            .reduce((total, i) => total + i, 0) / numSamples;
+            .reduce((total, i) => total + i, 0) / panVelocities.length;
 
         panVelocity = panVelocities[panVelocities.length - 1].vec.normalize().multiplyScalar(panSpeed);
 
@@ -100,22 +98,6 @@ export function mouse() {
         this.camera.zoom = 1.003 ** (scrollMax - scrollOverlay.scrollTop);
         this.camera.updateProjectionMatrix();
     }, 10);
-
-    // Mouse picking via raycasting
-    let sphereGeom = new THREE.SphereBufferGeometry(0.01, 12, 6);
-    let sphereMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-    let sphere = new THREE.Mesh(sphereGeom, sphereMat);
-    this.scene.add(sphere);
-
-    window.addEventListener('mousemove', (evt) => {
-        let pos = [
-            2 * evt.clientX / window.innerWidth - 1,
-            -(2 * evt.clientY / window.innerHeight - 1)
-        ];
-        let ray = new Ray();
-        ray.direction.set(pos[0], pos[1], -1).unproject(this.camera).normalize();
-        sphere.position.set(ray.direction.x, ray.direction.y, ray.direction.z);
-    });
 }
 
 export function onRender() {

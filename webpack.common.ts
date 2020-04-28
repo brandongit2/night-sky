@@ -44,13 +44,13 @@ const config: webpack.Configuration = {
                 use: ['file-loader']
             },
             {
-                test: /\.(glsl|obj)$/i,
+                test: /\.(glsl|obj|fnt)$/i,
                 use: ['raw-loader']
             }
         ]
     },
     resolve: {
-        extensions: ['.ts', '.tsx', '.js', '.png', '.glsl', '.obj', '.scss', '.sass', '.html']
+        extensions: ['.ts', '.tsx', '.js', '.png', '.glsl', '.obj', '.scss', '.sass', '.html', '.fnt']
     }
 };
 

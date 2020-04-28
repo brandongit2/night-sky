@@ -2,6 +2,7 @@ import './index.scss';
 import { mouse, onRender } from './mouse';
 import { skyGrid } from './skyGrid';
 import WEBGL from './WEBGL';
+import { TextLabel } from './TextLabel';
 import * as THREE from 'three';
 
 class NightSky {
@@ -29,6 +30,8 @@ class NightSky {
         for (let line of gridLines) {
             this.scene.add(line);
         }
+
+        new TextLabel(100, 100, 'hello world', { color: 'aaaaaa' });
 
         mouse.call(this);
 
