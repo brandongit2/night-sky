@@ -1,16 +1,18 @@
+import { Vector2 } from 'three';
 import { Line2 } from 'three/examples/jsm/lines/Line2';
 import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry';
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial';
-import { Vector2 } from 'three';
+
+import { colors } from './config.json';
 
 let thinMat = new LineMaterial({
-    color: 0x444444,
+    color: parseInt(colors.minorGrid, 16),
     linewidth: 1,
     resolution: new Vector2(window.innerWidth, window.innerHeight)
 });
 thinMat.depthTest = false;
 let thickMat = new LineMaterial({
-    color: 0x666666,
+    color: parseInt(colors.majorGrid, 16),
     linewidth: 2,
     resolution: new Vector2(window.innerWidth, window.innerHeight)
 });

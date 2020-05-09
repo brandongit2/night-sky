@@ -1,29 +1,33 @@
 // Check if WebGL is available
 
-let WEBGL = {
-    isWebGLAvailable: function () {
+export class WEBGL {
+    static isWebGLAvailable() {
         try {
             let canvas = document.createElement('canvas');
             return !!(window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
         } catch (e) {
             return false;
         }
-    },
-    isWebGL2Available: function () {
+    }
+
+    static isWebGL2Available() {
         try {
             let canvas = document.createElement('canvas');
             return !!(window.WebGL2RenderingContext && canvas.getContext('webgl2'));
         } catch (e) {
             return false;
         }
-    },
-    getWebGLErrorMessage: function () {
+    }
+
+    static getWebGLErrorMessage() {
         return this.getErrorMessage(1);
-    },
-    getWebGL2ErrorMessage: function () {
+    }
+
+    static getWebGL2ErrorMessage() {
         return this.getErrorMessage(2);
-    },
-    getErrorMessage: function (version: number) {
+    }
+
+    static getErrorMessage(version: number) {
         var names: { [key: number]: any } = {
             1: 'WebGL',
             2: 'WebGL 2'
@@ -36,6 +40,4 @@ let WEBGL = {
         var message = `Sorry, your ${contexts[version] ? 'graphics card' : 'browser'} does not seem to support <a href="http://khronos.org/webgl/wiki/Getting_a_WebGL_Implementation">${names[version]}</a>.`;
         return message;
     }
-};
-
-export default WEBGL;
+}

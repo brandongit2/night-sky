@@ -1,5 +1,7 @@
 // Draws text on the screen.
 
+import { colors } from './config.json';
+
 interface LabelOptions {
     color?: string;
     fontSize?: number;
@@ -25,8 +27,8 @@ export class TextLabel {
         this.fontSize = options?.fontSize ? options.fontSize : 12;
         this.align = options?.align ? options.align : 'center';
 
-        this.outlineText.style.color = 'black';
-        this.outlineText.style.webkitTextStroke = '8px black';
+        this.outlineText.style.color = `#${colors.sky}`;
+        this.outlineText.style.webkitTextStroke = `8px #${colors.sky}`;
 
         document.getElementById('label-container').appendChild(this.outlineText);
         document.getElementById('label-container').appendChild(this.mainText);

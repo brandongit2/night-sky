@@ -1,13 +1,15 @@
-import { coordinateLabels } from './coordinateLabels';
-import './index.scss';
-import { mouse, mouseOnRender, mouseOnResize } from './mouse';
-import { skyGrid, skyGridOnResize } from './skyGrid';
-import WEBGL from './WEBGL';
 import * as THREE from 'three';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
 import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader';
+
+import { colors } from './config.json';
+import { coordinateLabels } from './coordinateLabels';
+import './index.scss';
+import { mouse, mouseOnRender, mouseOnResize } from './mouse';
+import { skyGrid, skyGridOnResize } from './skyGrid';
+import { WEBGL } from './WEBGL';
 
 class NightSky {
     static scene: THREE.Scene;
@@ -17,6 +19,8 @@ class NightSky {
 
     static init() {
         this.scene = new THREE.Scene();
+        this.scene.background = new THREE.Color(parseInt(colors.sky, 16));
+
         this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.001, 100);
         this.camera.rotation.order = 'YXZ';
 
