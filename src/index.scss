@@ -40,8 +40,6 @@ p {
 
     span {
         position: absolute;
-        text-shadow: 0px 0px 10px black;
-        transform: translate(0px, -50%);
     }
 }
 
@@ -53,8 +51,4 @@ p {
     width: 110vw;
     height: 100vh;
     overflow: auto;
-
-    #scroll-content {
-        height: calc(100vh * 3);
-    }
 }

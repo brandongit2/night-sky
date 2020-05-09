@@ -4,13 +4,13 @@ import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial';
 import { Vector2 } from 'three';
 
 let thinMat = new LineMaterial({
-    color: 0x777777,
+    color: 0x444444,
     linewidth: 1,
     resolution: new Vector2(window.innerWidth, window.innerHeight)
 });
 thinMat.depthTest = false;
 let thickMat = new LineMaterial({
-    color: 0xaaaaaa,
+    color: 0x666666,
     linewidth: 2,
     resolution: new Vector2(window.innerWidth, window.innerHeight)
 });

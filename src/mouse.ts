@@ -1,15 +1,17 @@
 // Handles panning and zooming of camera
 
-import * as THREE from 'three';
 import { Ray, Vector2 } from 'three';
 
 let doInertia = false;
 let panVelocity: Vector2;
+const minZoom = 0.3;
+const maxZoom = 40;
+let zoom = 1;
 
 function rotCam(dx: number, dy: number) { // Rotates camera without going past -90° or +90° latitude
     let newXRot = this.camera.rotation.x + dx;
     if (newXRot > -Math.PI / 2 && newXRot < Math.PI / 2) this.camera.rotation.x = newXRot;
-    this.camera.rotation.y += dy;
+    this.camera.rotation.y = (this.camera.rotation.y + dy) % (2 * Math.PI);
 }
 
 export function mouse() {
@@ -93,25 +95,27 @@ export function mouse() {
     // Do scrolling
     let scrollOverlay = document.getElementById('scroll-overlay');
     let scrollContent = document.getElementById('scroll-content');
-    let scrollMin = Math.log(0.4) / Math.log(1.003);
-    let scrollMax = Math.log(40) / Math.log(1.003);
+    let scrollMin = Math.log(minZoom) / Math.log(1.003);
+    let scrollMax = Math.log(maxZoom) / Math.log(1.003);
     scrollContent.style.height = scrollMax + window.innerHeight - scrollMin + 'px';
     scrollOverlay.scrollTo(0, scrollMax);
     setInterval(() => {
-        this.camera.zoom = 1.003 ** (scrollMax - scrollOverlay.scrollTop);
-        this.camera.updateProjectionMatrix();
+        zoom = 1.003 ** (scrollMax - scrollOverlay.scrollTop);
     }, 10);
 }
 
 export function mouseOnRender() {
     if (doInertia) rotCam.call(this, panVelocity.x, panVelocity.y);
+
+    this.camera.zoom = zoom;
+    this.camera.updateProjectionMatrix();
 }
 
 export function mouseOnResize() {
     let scrollOverlay = document.getElementById('scroll-overlay');
     let scrollContent = document.getElementById('scroll-content');
-    let scrollMin = Math.log(0.4) / Math.log(1.003);
-    let scrollMax = Math.log(40) / Math.log(1.003);
+    let scrollMin = Math.log(minZoom) / Math.log(1.003);
+    let scrollMax = Math.log(maxZoom) / Math.log(1.003);
     scrollContent.style.height = scrollMax + window.innerHeight - scrollMin + 'px';
-    scrollOverlay.scrollTo(0, Math.log(this.camera.zoom) / Math.log(1.003) + scrollOverlay.scrollTop);
+    scrollOverlay.scrollTo(0, Math.log(zoom) / Math.log(1.003) + scrollOverlay.scrollTop);
 }

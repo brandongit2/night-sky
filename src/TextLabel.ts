@@ -25,6 +25,7 @@ export class TextLabel {
         this.fontSize = options?.fontSize ? options.fontSize : 12;
         this.align = options?.align ? options.align : 'center';
 
+        this.outlineText.style.color = 'black';
         this.outlineText.style.webkitTextStroke = '8px black';
 
         document.getElementById('label-container').appendChild(this.outlineText);
@@ -54,7 +55,6 @@ export class TextLabel {
     set color(color: string) {
         this._color = color;
         this.mainText.style.color = '#' + color;
-        this.outlineText.style.color = '#' + color;
     }
     get color() {
         return this._color;

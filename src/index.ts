@@ -17,7 +17,7 @@ class NightSky {
 
     static init() {
         this.scene = new THREE.Scene();
-        this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 10000);
+        this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.001, 100);
         this.camera.rotation.order = 'YXZ';
 
         this.renderer = new THREE.WebGLRenderer();
@@ -47,7 +47,7 @@ class NightSky {
             fxaaPass.material.uniforms.resolution.value.y = 1 / (window.innerHeight * window.devicePixelRatio);
 
             skyGridOnResize();
-            mouseOnResize();
+            mouseOnResize.call(this);
         });
 
         let gridLines = skyGrid();
