@@ -11,7 +11,7 @@ git clone git@github.com:brandongit2/night-sky.git
 cd night-sky
 ```
 
-Install the required packages (requires NPM):
+Install the required packages (requires npm):
 
 ```bash
 npm i

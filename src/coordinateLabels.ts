@@ -5,9 +5,11 @@ import { TextLabel } from './TextLabel';
 
 let decLabels: TextLabel[] = [];
 for (let theta = -80; theta <= 80; theta += 10) {
-    decLabels.push(new TextLabel(0, 0, theta + '°', {
+    let text = theta + '°';
+    if (theta === 0) text = '';
+    decLabels.push(new TextLabel(0, 0, text, {
         fontSize: 10,
-        color: theta === 0 ? colors.majorGrid : colors.minorGrid
+        color: colors.minorGrid
     }));
 }
 
@@ -38,21 +40,39 @@ export function coordinateLabels() {
 
     { // Right ascension
         let vFov = this.camera.getEffectiveFOV() * Math.PI / 180;
-        let fac1 = Math.cos(-vFov / 2 + this.camera.rotation.x) / Math.cos(-vFov / 2);
-
         let hFov = 2 * Math.atan(Math.tan(vFov / 2) * this.camera.aspect);
-        let fac2 = Math.tan(hFov / 2);
+
         for (let n = 0; n < raLabels.length; n++) {
             let ang = (n * 360 / 24) * Math.PI / 180 + this.camera.rotation.y;
-            let pos = Math.tan(ang);
+            let x = Math.tan(ang);
+            let y;
+
+            if (vFov / 2 - this.camera.rotation.x < 0) { // Render at bottom of screen
+                x *= Math.cos(vFov / 2 - this.camera.rotation.x) / Math.cos(vFov / 2);
+                x /= Math.tan(hFov / 2);
+                y = window.innerHeight - 10;
+            } else if (-vFov / 2 - this.camera.rotation.x > 0) { // Render at top of screen
+                x *= Math.cos(vFov / 2 + this.camera.rotation.x) / Math.cos(vFov / 2);
+                x /= Math.tan(hFov / 2);
+                y = 10;
+            } else { // Render at equator
+                x /= Math.cos(this.camera.rotation.x);
+                x /= Math.tan(hFov / 2);
+                y = (Math.tan(this.camera.rotation.x) / Math.tan(vFov / 2) / 2 + 0.5) * window.innerHeight;
+
+                if (y < 10) y = 10;
+                if (y > window.innerHeight - 10) y = window.innerHeight - 10;
+            }
+
             let onScreen = true;
             if (
                 (ang < -Math.PI / 2 && ang > -3 * Math.PI / 2)
                 || (ang > Math.PI / 2 && ang < 3 * Math.PI / 2)
             ) onScreen = false;
+
             raLabels[n].pos = [
-                (pos / fac2 * fac1 / 2 + 0.5) * window.innerWidth,
-                onScreen ? window.innerHeight - 10 : -100
+                (x / 2 + 0.5) * window.innerWidth,
+                onScreen ? y : -100
             ];
         }
     }
