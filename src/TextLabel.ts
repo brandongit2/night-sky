@@ -34,12 +34,18 @@ export class TextLabel {
         document.getElementById('label-container').appendChild(this.mainText);
     }
 
+    _setPosAlign() {
+        let a = 0;
+        if (this._align === 'center') a = 50;
+        if (this._align === 'right') a = 100;
+
+        this.mainText.style.transform = `translate(calc(${this._pos[0]}px - ${a}%), calc(${this._pos[1]}px - 50%))`;
+        this.outlineText.style.transform = `translate(calc(${this._pos[0]}px - ${a}%), calc(${this._pos[1]}px - 50%))`;
+    }
+
     set pos(pos: number[]) {
         this._pos = pos;
-        this.mainText.style.left = pos[0] + 'px';
-        this.outlineText.style.left = pos[0] + 'px';
-        this.mainText.style.top = pos[1] + 'px';
-        this.outlineText.style.top = pos[1] + 'px';
+        this._setPosAlign();
     }
     get pos() {
         return this._pos;
@@ -73,20 +79,7 @@ export class TextLabel {
 
     set align(align: 'left' | 'center' | 'right') {
         this._align = align;
-        let a;
-        switch (align) {
-            case 'left':
-                a = 'translate(0px, -50%)';
-                break;
-            case 'center':
-                a = 'translate(-50%, -50%)';
-                break;
-            case 'right':
-                a = 'translate(-100%, -50%)';
-                break;
-        }
-        this.mainText.style.transform = a;
-        this.outlineText.style.transform = a;
+        this._setPosAlign();
     }
     get align() {
         return this._align;

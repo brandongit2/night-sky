@@ -59,9 +59,11 @@ export function coordinateLabels() {
                 x /= Math.cos(this.camera.rotation.x);
                 x /= Math.tan(hFov / 2);
                 y = (Math.tan(this.camera.rotation.x) / Math.tan(vFov / 2) / 2 + 0.5) * window.innerHeight;
-
-                if (y < 10) y = 10;
-                if (y > window.innerHeight - 10) y = window.innerHeight - 10;
+                if (y < 10) {
+                    y = 10;
+                } else if (y > window.innerHeight - 10) {
+                    y = window.innerHeight - 10
+                }
             }
 
             let onScreen = true;
