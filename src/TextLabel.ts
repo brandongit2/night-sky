@@ -9,8 +9,7 @@ interface LabelOptions {
 }
 
 export class TextLabel {
-    mainText: HTMLSpanElement;
-    outlineText: HTMLSpanElement;
+    domElement: HTMLSpanElement;
     _pos = [0, 0];
     _text: string;
     _color: string;
@@ -18,8 +17,7 @@ export class TextLabel {
     _align: 'left' | 'center' | 'right';
 
     constructor(x: number, y: number, text: string, options?: LabelOptions) {
-        this.mainText = document.createElement('span');
-        this.outlineText = document.createElement('span');
+        this.domElement = document.createElement('span');
 
         this.pos = [x, y];
         this.text = text;
@@ -27,11 +25,9 @@ export class TextLabel {
         this.fontSize = options?.fontSize ? options.fontSize : 12;
         this.align = options?.align ? options.align : 'center';
 
-        this.outlineText.style.color = `#${colors.sky}`;
-        this.outlineText.style.webkitTextStroke = `8px #${colors.sky}`;
+        this.domElement.style.background = '#' + colors.sky;
 
-        document.getElementById('label-container').appendChild(this.outlineText);
-        document.getElementById('label-container').appendChild(this.mainText);
+        document.getElementById('label-container').appendChild(this.domElement);
     }
 
     _setPosAlign() {
@@ -39,8 +35,7 @@ export class TextLabel {
         if (this._align === 'center') a = 50;
         if (this._align === 'right') a = 100;
 
-        this.mainText.style.transform = `translate(calc(${this._pos[0]}px - ${a}%), calc(${this._pos[1]}px - 50%))`;
-        this.outlineText.style.transform = `translate(calc(${this._pos[0]}px - ${a}%), calc(${this._pos[1]}px - 50%))`;
+        this.domElement.style.transform = `translate(calc(${this._pos[0]}px - ${a}%), calc(${this._pos[1]}px - 50%))`;
     }
 
     set pos(pos: number[]) {
@@ -53,8 +48,7 @@ export class TextLabel {
 
     set text(text: string) {
         this._text = text;
-        this.mainText.innerHTML = text;
-        this.outlineText.innerHTML = text;
+        this.domElement.innerHTML = text;
     }
     get text() {
         return this._text;
@@ -62,7 +56,7 @@ export class TextLabel {
 
     set color(color: string) {
         this._color = color;
-        this.mainText.style.color = '#' + color;
+        this.domElement.style.color = '#' + color;
     }
     get color() {
         return this._color;
@@ -70,8 +64,7 @@ export class TextLabel {
 
     set fontSize(size: number) {
         this._fontSize = size;
-        this.mainText.style.fontSize = size + 'pt';
-        this.outlineText.style.fontSize = size + 'pt';
+        this.domElement.style.fontSize = size + 'pt';
     }
     get fontSize() {
         return this._fontSize;

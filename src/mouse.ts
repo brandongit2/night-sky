@@ -70,7 +70,11 @@ export function mouse() {
             .map(({ vec: v }) => Math.sqrt(v.x ** 2 + v.y ** 2))
             .reduce((total, i) => total + i, 0) / panVelocities.length;
 
-        panVelocity = panVelocities[panVelocities.length - 1].vec.normalize().multiplyScalar(panSpeed);
+        panVelocity = panVelocities
+            .slice(-2)
+            .reduce((total, { vec }) => total.add(vec), new Vector2())
+            .normalize()
+            .multiplyScalar(panSpeed);
 
         let velDifference = panVelocity.clone().multiplyScalar(inertiaFactor);
 
