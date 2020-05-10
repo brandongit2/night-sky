@@ -7,7 +7,10 @@ import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader';
 import { colors } from './config.json';
 import { coordinateLabels } from './coordinateLabels';
 import './index.scss';
-import { mouse, mouseOnRender, mouseOnResize } from './mouse';
+import { mouseInit, mouseOnRender } from './input/mouse';
+import { inputOnRender } from './input/pan';
+import { touchInit } from './input/touch';
+import { zoomInit, zoomOnRender, zoomOnResize } from './input/zoom';
 import { skyGrid, skyGridOnResize } from './skyGrid';
 import { WEBGL } from './WEBGL';
 
@@ -29,6 +32,7 @@ class NightSky {
         this.renderer.setPixelRatio(window.devicePixelRatio);
         document.body.appendChild(this.renderer.domElement);
 
+        // Do FXAA
         let renderPass = new RenderPass(this.scene, this.camera);
         let fxaaPass = new ShaderPass(FXAAShader);
         // @ts-ignore
@@ -51,7 +55,7 @@ class NightSky {
             fxaaPass.material.uniforms.resolution.value.y = 1 / (window.innerHeight * window.devicePixelRatio);
 
             skyGridOnResize();
-            mouseOnResize.call(this);
+            zoomOnResize.call(this);
         });
 
         let gridLines = skyGrid();
@@ -59,11 +63,15 @@ class NightSky {
             this.scene.add(line);
         }
 
-        mouse.call(this);
+        zoomInit.call(this);
+        mouseInit.call(this);
+        touchInit.call(this);
 
         let animate = () => {
             requestAnimationFrame(animate);
 
+            zoomOnRender.call(this);
+            inputOnRender.call(this);
             mouseOnRender.call(this);
             coordinateLabels.call(this);
 
