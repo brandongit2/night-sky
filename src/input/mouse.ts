@@ -1,5 +1,3 @@
-// Handles panning and zooming of camera
-
 import * as Input from './pan';
 
 let panSpeed = 0.00062;
@@ -19,8 +17,4 @@ export function mouseInit() {
     window.addEventListener('mouseup', (evt) => {
         Input.release.call(this);
     });
-}
-
-export function mouseOnRender() {
-    this.camera.updateProjectionMatrix();
 }

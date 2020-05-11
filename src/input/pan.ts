@@ -52,7 +52,7 @@ export function start() {
 export function release() {
     // Get average speed of mouse movement
     panVelocities = panVelocities.filter(({ time: t }) => Date.now() - t < 100);
-    if (panVelocities.length <= 1) return;
+    if (panVelocities.length <= 1 || panVelocities[panVelocities.length - 1].time - panVelocities[0].time === 0) return;
 
     // Get the total distance moved, then divide by time taken
     let panSpeed = panVelocities

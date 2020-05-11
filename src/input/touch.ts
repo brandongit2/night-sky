@@ -33,14 +33,8 @@ function startZoom(evt: TouchEvent) {
     zoomFingers = [evt.touches[0].identifier, evt.touches[1].identifier];
     let touch1 = evt.touches[0];
     let touch2 = evt.touches[1];
-    lastDist = dist(
-        [touch1.clientX, touch1.clientY],
-        [touch2.clientX, touch2.clientY]
-    );
-    lastPos = midpoint(
-        [touch1.clientX, touch1.clientY],
-        [touch2.clientX, touch2.clientY]
-    );
+    lastDist = dist([touch1.clientX, touch1.clientY], [touch2.clientX, touch2.clientY]);
+    lastPos = midpoint([touch1.clientX, touch1.clientY], [touch2.clientX, touch2.clientY]);
 };
 
 function endZoom() {
@@ -54,19 +48,17 @@ function endZoom() {
 
     // Get average speed of mouse movement
     amtZoomed = amtZoomed.filter(({ time: t }) => Date.now() - t < 30);
-    if (amtZoomed.length <= 1) return;
+    if (amtZoomed.length <= 1 || amtZoomed[amtZoomed.length - 1].time - amtZoomed[0].time === 0) return;
 
-    let zoomSpeed = (amtZoomed[amtZoomed.length - 1].amt - amtZoomed[0].amt) / (amtZoomed[amtZoomed.length - 1].time - amtZoomed[0].time);
+    let zoomSpeed = (amtZoomed[amtZoomed.length - 1].amt - amtZoomed[0].amt)
+        / (amtZoomed[amtZoomed.length - 1].time - amtZoomed[0].time);
     let speedDifference = -zoomSpeed * zoomInertiaFactor;
 
     zoomInertia = setInterval(() => {
         scrollOverlay.scrollBy(0, zoomSpeed);
         zoomSpeed += speedDifference;
         speedDifference *= 0.98;
-        if (
-            (speedDifference < 0 && zoomSpeed < 0)
-            || (speedDifference > 0 && zoomSpeed > 0)
-        ) {
+        if ((speedDifference < 0 && zoomSpeed < 0) || (speedDifference > 0 && zoomSpeed > 0)) {
             clearInterval(zoomInertia);
             zoomInertia = undefined;
         }
@@ -90,10 +82,7 @@ export function touchInit() {
         } else if (mode === 2) {
             let touch1 = Array.from(evt.touches).find((el) => el.identifier === zoomFingers[0]);
             let touch2 = Array.from(evt.touches).find((el) => el.identifier === zoomFingers[1]);
-            let newDist = dist(
-                [touch1.clientX, touch1.clientY],
-                [touch2.clientX, touch2.clientY]
-            );
+            let newDist = dist([touch1.clientX, touch1.clientY], [touch2.clientX, touch2.clientY]);
             scrollOverlay.scrollBy(0, (newDist - lastDist) * -zoomFactor);
             let prevAmt = amtZoomed[amtZoomed.length - 1]?.amt;
             if (prevAmt == undefined) prevAmt = 0;
@@ -104,10 +93,7 @@ export function touchInit() {
             lastDist = newDist;
 
             // Panning continues in zoom mode using the midpoint of the two fingers.
-            let mid = midpoint(
-                [touch1.clientX, touch1.clientY],
-                [touch2.clientX, touch2.clientY]
-            );
+            let mid = midpoint([touch1.clientX, touch1.clientY], [touch2.clientX, touch2.clientY]);
             Pan.pan.call(
                 this,
                 mid[0], mid[1],

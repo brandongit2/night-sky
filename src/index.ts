@@ -5,13 +5,14 @@ import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
 import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader';
 
 import { colors } from './config.json';
-import { coordinateLabels } from './coordinateLabels';
+import { coordinateLabelsOnRender, coordinateLabelsInit } from './coordinateLabels';
 import './index.scss';
-import { mouseInit, mouseOnRender } from './input/mouse';
+import { mouseInit } from './input/mouse';
 import { inputOnRender } from './input/pan';
 import { touchInit } from './input/touch';
 import { zoomInit, zoomOnRender, zoomOnResize } from './input/zoom';
-import { skyGrid, skyGridOnResize } from './skyGrid';
+import { skyGridInit, skyGridOnResize } from './skyGrid';
+import { textLabelInit, textLabelOnRender, textLabelOnResize } from './TextLabel';
 import { WEBGL } from './WEBGL';
 
 class NightSky {
@@ -30,6 +31,7 @@ class NightSky {
         this.renderer = new THREE.WebGLRenderer();
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.setPixelRatio(window.devicePixelRatio);
+        this.renderer.domElement.setAttribute('id', 'main-canvas');
         document.body.appendChild(this.renderer.domElement);
 
         // Do FXAA
@@ -43,37 +45,36 @@ class NightSky {
         this.composer.addPass(renderPass);
         this.composer.addPass(fxaaPass);
 
+        textLabelInit.call(this);
+        skyGridInit.call(this);
+        coordinateLabelsInit.call(this);
+        zoomInit.call(this);
+        mouseInit.call(this);
+        touchInit.call(this);
+
         window.addEventListener('resize', () => {
-            this.camera.aspect = window.innerWidth / window.innerHeight;
-            this.camera.updateProjectionMatrix();
             this.renderer.setSize(window.innerWidth, window.innerHeight);
             this.composer.setSize(window.innerWidth, window.innerHeight);
+            this.camera.aspect = window.innerWidth / window.innerHeight;
 
             // @ts-ignore
             fxaaPass.material.uniforms.resolution.value.x = 1 / (window.innerWidth * window.devicePixelRatio);
             // @ts-ignore
             fxaaPass.material.uniforms.resolution.value.y = 1 / (window.innerHeight * window.devicePixelRatio);
 
-            skyGridOnResize();
+            skyGridOnResize.call(this);
             zoomOnResize.call(this);
+            textLabelOnResize.call(this);
         });
-
-        let gridLines = skyGrid();
-        for (let line of gridLines) {
-            this.scene.add(line);
-        }
-
-        zoomInit.call(this);
-        mouseInit.call(this);
-        touchInit.call(this);
 
         let animate = () => {
             requestAnimationFrame(animate);
 
             zoomOnRender.call(this);
             inputOnRender.call(this);
-            mouseOnRender.call(this);
-            coordinateLabels.call(this);
+            coordinateLabelsOnRender.call(this);
+            textLabelOnRender.call(this);
+            this.camera.updateProjectionMatrix();
 
             this.composer.render();
         }
@@ -86,4 +87,4 @@ class NightSky {
     }
 }
 
-NightSky.init();
+window.addEventListener('load', NightSky.init);

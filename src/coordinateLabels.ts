@@ -4,24 +4,29 @@ import { colors } from './config.json';
 import { TextLabel } from './TextLabel';
 
 let decLabels: TextLabel[] = [];
-for (let theta = -80; theta <= 80; theta += 10) {
-    let text = theta + '°';
-    if (theta === 0) text = '';
-    decLabels.push(new TextLabel(0, 0, text, {
-        fontSize: 10,
-        color: colors.minorGrid
-    }));
-}
-
 let raLabels: TextLabel[] = [];
-for (let theta = 0; theta < 360; theta += 360 / 24) {
-    raLabels.push(new TextLabel(0, 0, theta / 15 + 'h', {
-        fontSize: 10,
-        color: theta % 90 === 0 ? colors.majorGrid : colors.minorGrid
-    }));
+
+export function coordinateLabelsInit() {
+    for (let theta = -80; theta <= 80; theta += 10) {
+        let text = theta + '°';
+        if (theta === 0) text = '';
+        decLabels.push(new TextLabel(0, 0, text, {
+            fontSize: 10,
+            color: colors.minorGrid,
+            vAlign: 'middle'
+        }));
+    }
+
+    for (let theta = 0; theta < 360; theta += 360 / 24) {
+        raLabels.push(new TextLabel(0, 0, theta / 15 + 'h', {
+            fontSize: 10,
+            color: theta % 90 === 0 ? colors.majorGrid : colors.minorGrid,
+            vAlign: 'middle'
+        }));
+    }
 }
 
-export function coordinateLabels() {
+export function coordinateLabelsOnRender() {
     { // Declination
         for (let i = 0; i < decLabels.length; i++) {
             let theta = (i * 10 - 80) * Math.PI / 180;

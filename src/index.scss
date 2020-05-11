@@ -15,7 +15,7 @@ p {
     top: 0px;
     left: 0px;
     width: 100vw;
-    height: 100vh;
+    height: 100%;
     background: white;
 
     &.hidden {
@@ -31,19 +31,19 @@ p {
     }
 }
 
-#label-container {
+#main-canvas {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    z-index: -1;
+}
+
+#text-labels {
     position: fixed;
     top: 0px;
     left: 0px;
     width: 100vw;
-    height: 100vh;
-
-    span {
-        position: absolute;
-        top: 0px;
-        left: 0px;
-        padding: 0px 2px;
-    }
+    height: 100%;
 }
 
 #scroll-overlay {
@@ -52,6 +52,6 @@ p {
     top: 0px;
     left: 0px;
     width: 110vw;
-    height: 100vh;
+    height: 100%;
     overflow: auto;
 }

@@ -18,7 +18,7 @@ let thickMat = new LineMaterial({
 });
 thickMat.depthTest = false;
 
-export function skyGrid() {
+export function skyGridInit() {
     let verts: number[] = [];
     let numVerts = 100; // Number of vertices in half a circle of the grid line
 
@@ -49,29 +49,28 @@ export function skyGrid() {
     let latGeom = new LineGeometry();
     latGeom.setPositions(verts);
 
-    let lines = [];
     let numLongLines = 24; // Longitude lines, must be a multiple of 4
     for (let i = 0; i < numLongLines; i++) {
-        lines.push(
-            i % (numLongLines / 4) === 0
-                ? new Line2(longLongGeom, thickMat)
-                : new Line2(shortLongGeom, thinMat)
-        );
-        lines[i].computeLineDistances();
-        lines[i].renderOrder = -1; // Render below everything else
-        lines[i].rotation.set(0, i / numLongLines * 2 * Math.PI, 0);
+        let line = i % (numLongLines / 4) === 0
+            ? new Line2(longLongGeom, thickMat)
+            : new Line2(shortLongGeom, thinMat);
+        line.computeLineDistances();
+        line.renderOrder = -1; // Render below everything else
+        line.rotation.set(0, i / numLongLines * 2 * Math.PI, 0);
+
+        this.scene.add(line);
     }
 
     let numLatLines = 16; // Latitude lines, must be a multiple of 2
     for (let i = -80; i <= 80; i += 160 / numLatLines) {
-        lines.push(new Line2(latGeom, i === 0 ? thickMat : thinMat));
-        lines[lines.length - 1].computeLineDistances();
-        lines[lines.length - 1].renderOrder = -1; //Render below everything else
-        lines[lines.length - 1].scale.set(Math.cos(i * Math.PI / 180), 1, Math.cos(i * Math.PI / 180));
-        lines[lines.length - 1].position.y = Math.sin(i * Math.PI / 180);
-    }
+        let line = new Line2(latGeom, i === 0 ? thickMat : thinMat);
+        line.computeLineDistances();
+        line.renderOrder = -1; //Render below everything else
+        line.scale.set(Math.cos(i * Math.PI / 180), 1, Math.cos(i * Math.PI / 180));
+        line.position.y = Math.sin(i * Math.PI / 180);
 
-    return lines;
+        this.scene.add(line);
+    }
 }
 
 export function skyGridOnResize() {

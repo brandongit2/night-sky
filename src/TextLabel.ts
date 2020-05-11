@@ -4,77 +4,112 @@ import { colors } from './config.json';
 
 interface LabelOptions {
     color?: string;
+    font?: string;
     fontSize?: number;
-    align?: 'left' | 'center' | 'right';
+    hAlign?: 'left' | 'center' | 'right';
+    vAlign?: 'top' | 'middle' | 'bottom';
+}
+
+let canvas: HTMLCanvasElement;
+let context: CanvasRenderingContext2D;
+let labels: TextLabel[] = [];
+
+export function textLabelInit() {
+    canvas = <HTMLCanvasElement>document.getElementById('text-labels');
+    canvas.width = window.innerWidth * window.devicePixelRatio;
+    canvas.height = window.innerHeight * window.devicePixelRatio;
+
+    context = canvas.getContext('2d');
+    context.transform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
+}
+
+export function textLabelOnRender() {
+    context.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+    context.lineWidth = 6;
+    context.strokeStyle = '#' + colors.sky;
+
+    for (let label of labels) {
+        context.font = `${label.fontSize}pt ${label.font}`;
+        let x, y;
+        switch (label.hAlign) {
+            case 'left': x = 0; break;
+            case 'center': x = -label.metrics.width / 2; break;
+            case 'right': x = -label.metrics.width; break;
+        }
+        x += label.pos[0];
+
+        switch (label.vAlign) {
+            case 'top': y = label.metrics.actualBoundingBoxAscent; break;
+            case 'middle': y = label.metrics.actualBoundingBoxAscent / 2; break;
+            case 'bottom': y = 0; break;
+        }
+        y += label.pos[1];
+
+        context.strokeText(label.text, x, y);
+        context.fillStyle = '#' + label.color;
+        context.fillText(label.text, x, y);
+    }
+}
+
+export function textLabelOnResize() {
+    canvas.width = window.innerWidth * window.devicePixelRatio;
+    canvas.height = window.innerHeight * window.devicePixelRatio;
+    context.transform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
+
+    for (let label of labels) {
+        label.recalculateMetrics();
+    }
 }
 
 export class TextLabel {
-    domElement: HTMLSpanElement;
-    _pos = [0, 0];
+    pos = [0, 0];
     _text: string;
-    _color: string;
+    color: string;
+    _font: string;
     _fontSize: number;
-    _align: 'left' | 'center' | 'right';
+    hAlign: 'left' | 'center' | 'right';
+    vAlign: 'top' | 'middle' | 'bottom';
+    metrics: TextMetrics;
 
     constructor(x: number, y: number, text: string, options?: LabelOptions) {
-        this.domElement = document.createElement('span');
-
         this.pos = [x, y];
         this.text = text;
         this.color = options?.color ? options.color : 'ffffff';
+        this.font = options?.font ? options.font : '\'Segoe UI\', Tahoma, Geneva, Verdana, sans-serif';
         this.fontSize = options?.fontSize ? options.fontSize : 12;
-        this.align = options?.align ? options.align : 'center';
+        this.hAlign = options?.hAlign ? options.hAlign : 'center';
+        this.vAlign = options?.vAlign ? options.vAlign : 'top';
 
-        this.domElement.style.background = '#' + colors.sky;
-
-        document.getElementById('label-container').appendChild(this.domElement);
-    }
-
-    _setPosAlign() {
-        let a = 0;
-        if (this._align === 'center') a = 50;
-        if (this._align === 'right') a = 100;
-
-        this.domElement.style.transform = `translate(calc(${this._pos[0]}px - ${a}%), calc(${this._pos[1]}px - 50%))`;
-    }
-
-    set pos(pos: number[]) {
-        this._pos = pos;
-        this._setPosAlign();
-    }
-    get pos() {
-        return this._pos;
+        labels.push(this);
     }
 
     set text(text: string) {
         this._text = text;
-        this.domElement.innerHTML = text;
+        this.recalculateMetrics();
     }
     get text() {
         return this._text;
     }
 
-    set color(color: string) {
-        this._color = color;
-        this.domElement.style.color = '#' + color;
+    set font(font: string) {
+        this._font = font;
+        this.recalculateMetrics();
     }
-    get color() {
-        return this._color;
+    get font() {
+        return this._font;
     }
 
-    set fontSize(size: number) {
-        this._fontSize = size;
-        this.domElement.style.fontSize = size + 'pt';
+    set fontSize(fontSize: number) {
+        this._fontSize = fontSize;
+        this.recalculateMetrics();
     }
     get fontSize() {
         return this._fontSize;
     }
 
-    set align(align: 'left' | 'center' | 'right') {
-        this._align = align;
-        this._setPosAlign();
-    }
-    get align() {
-        return this._align;
+    recalculateMetrics() {
+        context.font = `${this.fontSize}pt ${this.font}`;
+        this.metrics = context.measureText(this.text);
     }
 }
