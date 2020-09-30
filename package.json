@@ -21,8 +21,6 @@
     "dependencies": {
         "express": "^4.17.1",
         "gl-matrix": "^3.3.0",
-        "react": "^16.13.1",
-        "react-dom": "^16.13.1",
         "three": "^0.120.1"
     },
     "devDependencies": {

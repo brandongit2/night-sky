@@ -1,3 +1,5 @@
+import { NightSky } from '../NightSky';
+
 const minZoom = 0.3;
 const maxZoom = 40;
 let zoom = 1;
@@ -6,20 +8,20 @@ let scrollMax = Math.log(maxZoom) / Math.log(1.003);
 let scrollOverlay: HTMLElement, scrollContent: HTMLElement;
 let initHeight: number;
 
-export function zoomInit() {
+NightSky.attachToInitialization(() => {
     initHeight = window.innerHeight;
     scrollOverlay = document.getElementById('scroll-overlay');
     scrollContent = document.getElementById('scroll-content');
     scrollContent.style.height = scrollMax + window.innerHeight - scrollMin + 'px';
     scrollOverlay.scrollTo(0, scrollMax);
-}
+});
 
-export function zoomOnRender() {
+NightSky.attachToRenderLoop(function () {
     zoom = scrollToZoom(scrollOverlay.scrollTop);
     this.camera.zoom = zoom;
-}
+});
 
-export function zoomOnResize() {
+NightSky.attachToResizeEvent(() => {
     if (initHeight > window.innerHeight) { // If window just got smaller
         scrollContent.style.height = scrollMax + window.innerHeight - scrollMin + 'px';
     } else { // If window just got bigger
@@ -27,7 +29,7 @@ export function zoomOnResize() {
         scrollOverlay.scrollTop = zoomToScroll(zoom);
     }
     initHeight = window.innerHeight;
-}
+});
 
 // Translates from scrollTop to zoom
 function scrollToZoom(scroll: number) {

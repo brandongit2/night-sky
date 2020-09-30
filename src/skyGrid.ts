@@ -1,8 +1,9 @@
 import { Vector2 } from 'three';
-import { Line2 } from 'three/examples/jsm/lines/Line2';
+import { Line2 } from 'three/examples/jsm/lines/Line2'; // Lines with thickness
 import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry';
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial';
 
+import { NightSky } from './NightSky';
 import { colors } from './config.json';
 
 let thinMat = new LineMaterial({
@@ -18,7 +19,7 @@ let thickMat = new LineMaterial({
 });
 thickMat.depthTest = false;
 
-export function skyGridInit() {
+NightSky.attachToInitialization(function () {
     let verts: number[] = [];
     let numVerts = 150; // Number of vertices in half a circle of the grid line
 
@@ -68,15 +69,15 @@ export function skyGridInit() {
     for (let i = -80; i <= 80; i += 160 / numLatLines) {
         let line = new Line2(latGeom, i === 0 ? thickMat : thinMat);
         line.computeLineDistances();
-        line.renderOrder = -1; //Render below everything else
+        line.renderOrder = -1; // Render below everything else
         line.scale.set(Math.cos(i * Math.PI / 180), 1, Math.cos(i * Math.PI / 180));
         line.position.y = Math.sin(i * Math.PI / 180);
 
         this.scene.add(line);
     }
-}
+});
 
-export function skyGridOnResize() {
+NightSky.attachToResizeEvent(() => {
     thinMat.resolution.set(window.innerWidth, window.innerHeight);
     thickMat.resolution.set(window.innerWidth, window.innerHeight);
-}
+});

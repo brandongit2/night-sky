@@ -1,5 +1,6 @@
 // Draws text on the screen.
 
+import { NightSky } from './NightSky';
 import { colors } from './config.json';
 
 interface LabelOptions {
@@ -14,16 +15,16 @@ let canvas: HTMLCanvasElement;
 let context: CanvasRenderingContext2D;
 let labels: TextLabel[] = [];
 
-export function textLabelInit() {
+NightSky.attachToInitialization(() => {
     canvas = <HTMLCanvasElement>document.getElementById('text-labels');
     canvas.width = window.innerWidth * window.devicePixelRatio;
     canvas.height = window.innerHeight * window.devicePixelRatio;
 
     context = canvas.getContext('2d');
     context.transform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
-}
+});
 
-export function textLabelOnRender() {
+NightSky.attachToRenderLoop(() => {
     context.clearRect(0, 0, window.innerWidth, window.innerHeight);
 
     context.lineWidth = 6;
@@ -50,9 +51,9 @@ export function textLabelOnRender() {
         context.fillStyle = '#' + label.color;
         context.fillText(label.text, x, y);
     }
-}
+});
 
-export function textLabelOnResize() {
+NightSky.attachToResizeEvent(() => {
     canvas.width = window.innerWidth * window.devicePixelRatio;
     canvas.height = window.innerHeight * window.devicePixelRatio;
     context.transform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
@@ -60,7 +61,7 @@ export function textLabelOnResize() {
     for (let label of labels) {
         label.recalculateMetrics();
     }
-}
+});
 
 export class TextLabel {
     pos = [0, 0];

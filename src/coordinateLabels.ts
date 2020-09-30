@@ -1,12 +1,13 @@
 // Draws labels for right ascension and declination.
 
+import { NightSky } from './NightSky';
 import { colors } from './config.json';
 import { TextLabel } from './TextLabel';
 
 let decLabels: TextLabel[] = [];
 let raLabels: TextLabel[] = [];
 
-export function coordinateLabelsInit() {
+NightSky.attachToInitialization(() => {
     for (let theta = -80; theta <= 80; theta += 10) {
         let text = theta + '°';
         if (theta === 0) text = '';
@@ -24,9 +25,9 @@ export function coordinateLabelsInit() {
             vAlign: 'middle'
         }));
     }
-}
+});
 
-export function coordinateLabelsOnRender() {
+NightSky.attachToRenderLoop(function () {
     { // Declination
         for (let i = 0; i < decLabels.length; i++) {
             let theta = (i * 10 - 80) * Math.PI / 180;
@@ -83,4 +84,4 @@ export function coordinateLabelsOnRender() {
             ];
         }
     }
-}
+});

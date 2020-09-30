@@ -1,17 +1,19 @@
+import { Inertia } from './Inertia';
+import { NightSky } from '../NightSky';
 import * as Pan from './pan';
-import { dist, midpoint, avg } from '../util';
+import { dist, midpoint } from '../util';
 
 const panFactor = 0.0017;
 const zoomFactor = 1.2;
-const zoomInertiaFactor = 0.03;
 
 let mode = 0; // 0 - None; 1 - Pan; 2 - Zoom
 let panFinger: number;
 let lastPos: number[];
 let zoomFingers: number[];
 let lastDist: number;
-let amtZoomed: Array<{ amt: number, time: number }> = [];
-let zoomInertia: NodeJS.Timeout;
+let zoomLog: Array<{ amt: number, time: number }> = [];
+
+let zoomInertia = new Inertia(1);
 
 function startPan(evt: TouchEvent) {
     mode = 1;
@@ -29,7 +31,7 @@ function endPan() {
 
 function startZoom(evt: TouchEvent) {
     mode = 2;
-    amtZoomed = [];
+    zoomLog = [];
     zoomFingers = [evt.touches[0].identifier, evt.touches[1].identifier];
     let touch1 = evt.touches[0];
     let touch2 = evt.touches[1];
@@ -42,35 +44,32 @@ function endZoom() {
     zoomFingers = undefined;
     lastDist = undefined;
 
-    clearInterval(zoomInertia);
+    zoomLog = zoomLog.filter(({ time: t }) => Date.now() - t < 70);
+    if (zoomLog.length <= 1 || zoomLog[zoomLog.length - 1].time - zoomLog[0].time === 0) return;
+
+    let zoomSpeed = (zoomLog[zoomLog.length - 1].amt - zoomLog[0].amt)
+        / (zoomLog[zoomLog.length - 1].time - zoomLog[0].time);
 
     let scrollOverlay = document.getElementById('scroll-overlay');
-
-    // Get average speed of mouse movement
-    amtZoomed = amtZoomed.filter(({ time: t }) => Date.now() - t < 30);
-    if (amtZoomed.length <= 1 || amtZoomed[amtZoomed.length - 1].time - amtZoomed[0].time === 0) return;
-
-    let zoomSpeed = (amtZoomed[amtZoomed.length - 1].amt - amtZoomed[0].amt)
-        / (amtZoomed[amtZoomed.length - 1].time - amtZoomed[0].time);
-    let speedDifference = -zoomSpeed * zoomInertiaFactor;
-
-    zoomInertia = setInterval(() => {
-        scrollOverlay.scrollBy(0, zoomSpeed);
-        zoomSpeed += speedDifference;
-        speedDifference *= 0.98;
-        if ((speedDifference < 0 && zoomSpeed < 0) || (speedDifference > 0 && zoomSpeed > 0)) {
-            clearInterval(zoomInertia);
-            zoomInertia = undefined;
-        }
-    }, 10);
+    zoomInertia.start(zoomSpeed, (delta) => { scrollOverlay.scrollBy(0, delta * 10); });
 };
 
-export function touchInit() {
+NightSky.attachToRenderLoop(() => {
     let scrollOverlay = document.getElementById('scroll-overlay');
     scrollOverlay.addEventListener('touchmove', (evt) => { evt.preventDefault() });
 
+    window.addEventListener('touchstart', (evt) => {
+        if (evt.touches.length === 1) {
+            startPan.call(this, evt);
+            console.log('start pan');
+        } else if (evt.touches.length === 2) {
+            startZoom.call(this, evt);
+            console.log('start zoom');
+        }
+    });
+
     window.addEventListener('touchmove', (evt) => {
-        if (mode === 1) {
+        if (mode === 1) { // Panning
             let touch = Array.from(evt.touches).find((el) => el.identifier === panFinger);
             Pan.pan.call(
                 this,
@@ -79,14 +78,20 @@ export function touchInit() {
                 (touch.clientX - lastPos[0]) * panFactor
             );
             lastPos = [touch.clientX, touch.clientY];
-        } else if (mode === 2) {
+        } else if (mode === 2) { // Zooming
             let touch1 = Array.from(evt.touches).find((el) => el.identifier === zoomFingers[0]);
             let touch2 = Array.from(evt.touches).find((el) => el.identifier === zoomFingers[1]);
             let newDist = dist([touch1.clientX, touch1.clientY], [touch2.clientX, touch2.clientY]);
             scrollOverlay.scrollBy(0, (newDist - lastDist) * -zoomFactor);
-            let prevAmt = amtZoomed[amtZoomed.length - 1]?.amt;
-            if (prevAmt == undefined) prevAmt = 0;
-            amtZoomed.push({
+
+            let prevAmt;
+            if (prevAmt == undefined) {
+                prevAmt = 0;
+            } else {
+                prevAmt = zoomLog[zoomLog.length - 1].amt;
+            }
+
+            zoomLog.push({
                 amt: prevAmt + (newDist - lastDist) * -zoomFactor,
                 time: Date.now()
             });
@@ -104,22 +109,14 @@ export function touchInit() {
         }
     });
 
-    window.addEventListener('touchstart', (evt) => {
-        if (evt.touches.length === 1) {
-            startPan.call(this, evt);
-        } else if (evt.touches.length === 2) {
-            startZoom.call(this, evt);
-        }
-    });
-
     window.addEventListener('touchend', (evt) => {
         if (evt.touches.length === 1) { // Switch from zooming to panning
             endZoom.call(this);
-            startPan.call(this, evt);
         } else if (evt.touches.length === 0 && evt.changedTouches.length === 1) { // One finger lifted; stop panning
             endPan.call(this);
         } else if (evt.touches.length === 0 && evt.changedTouches.length === 2) { // Two fingers lifted; stop zooming
             endZoom.call(this);
+            endPan.call(this);
         } else if (evt.touches.length > 2) { // Check if finger lifted was a zoomFinger
             if (Array.from(evt.changedTouches).find(({ identifier }) => identifier === zoomFingers[0])) {
                 zoomFingers[0] = Array.from(evt.touches)
@@ -132,4 +129,4 @@ export function touchInit() {
             }
         }
     });
-}
+});
