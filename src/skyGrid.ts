@@ -20,31 +20,34 @@ thickMat.depthTest = false;
 
 export function skyGridInit() {
     let verts: number[] = [];
-    let numVerts = 100; // Number of vertices in half a circle of the grid line
+    let numVerts = 150; // Number of vertices in half a circle of the grid line
 
     /* Two sets of longitude (vertical) lines will be drawn: short ones, which go from -80° latitude to +80°, so as to
      * not clutter the poles; and long ones, which go all the way, drawn at 0°, 90°, 180°, and 270° longitude.
      */
 
     // Set short longitude line geometry
-    for (let i = -80; i <= 80 + 0.001; i += 160 / numVerts) { // +0.001 to account for floating point error
-        verts.push(0, Math.sin(i * Math.PI / 180), Math.cos(i * Math.PI / 180));
+    for (let i = 0; i <= numVerts; i++) {
+        let theta = (i * 160 / numVerts - 80) * Math.PI / 180;
+        verts.push(0, Math.sin(theta), Math.cos(theta));
     }
     let shortLongGeom = new LineGeometry();
     shortLongGeom.setPositions(verts);
     verts = [];
 
     // Set long longitude line geometry
-    for (let i = -90; i <= 90; i += 180 / numVerts) {
-        verts.push(0, Math.sin(i * Math.PI / 180), Math.cos(i * Math.PI / 180));
+    for (let i = 0; i <= 180; i++) {
+        let theta = (i * 180 / numVerts - 90) * Math.PI / 180;
+        verts.push(0, Math.sin(theta), Math.cos(theta));
     }
     let longLongGeom = new LineGeometry();
     longLongGeom.setPositions(verts);
     verts = [];
 
     // Set latitude line geometry
-    for (let i = 0; i <= 2 * Math.PI + 0.001; i += 2 * Math.PI / numVerts) { // +0.001 to account for floating point error
-        verts.push(Math.cos(i), 0, Math.sin(i));
+    for (let i = 0; i <= numVerts; i++) {
+        let theta = i * 2 * Math.PI / numVerts;
+        verts.push(Math.cos(theta), 0, Math.sin(theta));
     }
     let latGeom = new LineGeometry();
     latGeom.setPositions(verts);

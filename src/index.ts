@@ -11,7 +11,9 @@ import { mouseInit } from './input/mouse';
 import { inputOnRender } from './input/pan';
 import { touchInit } from './input/touch';
 import { zoomInit, zoomOnRender, zoomOnResize } from './input/zoom';
+import { solarSystemInit } from './solarSystem';
 import { skyGridInit, skyGridOnResize } from './skyGrid';
+import { SkyObject } from './SkyObject';
 import { textLabelInit, textLabelOnRender, textLabelOnResize } from './TextLabel';
 import { WEBGL } from './WEBGL';
 
@@ -20,6 +22,8 @@ class NightSky {
     static camera: THREE.PerspectiveCamera;
     static renderer: THREE.WebGLRenderer;
     static composer: EffectComposer;
+
+    static skyObjects: SkyObject[] = [];
 
     static init() {
         this.scene = new THREE.Scene();
@@ -48,6 +52,7 @@ class NightSky {
         textLabelInit.call(this);
         skyGridInit.call(this);
         coordinateLabelsInit.call(this);
+        solarSystemInit.call(this);
         zoomInit.call(this);
         mouseInit.call(this);
         touchInit.call(this);
