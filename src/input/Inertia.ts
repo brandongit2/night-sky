@@ -1,3 +1,9 @@
+import { DebugText } from "../debug/DebugText";
+import { NightSky } from "../NightSky";
+
+let easingLog: DebugText;
+let velocityLog: DebugText;
+
 export class Inertia {
     interval: NodeJS.Timeout;
 
@@ -6,27 +12,27 @@ export class Inertia {
     }
 
     start(velocity: number, callback: (delta: number) => void) {
-        document.getElementById('beepboop').style.background = 'red';
+        let startTime = Date.now();
+        let direction = velocity > 0;
         this.interval = setInterval(() => {
-            if (velocity > 0) {
-                velocity *= 0.99;
-                document.getElementById('beepboop').innerHTML = String(velocity);
-                if (velocity <= 0.05) {
+            let easing = Math.exp((-Date.now() + startTime) / 10000);
+            easingLog.update(String(easing));
+            velocityLog.update(String(velocity));
+            velocity *= easing;
+
+            if (direction) {
+                if (velocity <= 0.01) {
                     clearInterval(this.interval);
-                    document.getElementById('beepboop').style.background = 'green';
                     return;
                 }
-                callback(velocity);
             } else {
-                velocity *= 0.99;
-                document.getElementById('beepboop').innerHTML = String(velocity);
-                if (velocity >= -0.05) {
+                if (velocity >= -0.01) {
                     clearInterval(this.interval);
-                    document.getElementById('beepboop').style.background = 'green';
                     return;
                 }
-                callback(velocity);
             }
+
+            callback(velocity);
         }, 10);
     }
 
@@ -34,3 +40,8 @@ export class Inertia {
         clearInterval(this.interval);
     }
 }
+
+NightSky.attachToInitialization(() => {
+    easingLog = new DebugText('easing', '0');
+    velocityLog = new DebugText('velocity', '0');
+})

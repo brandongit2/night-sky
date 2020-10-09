@@ -23,12 +23,6 @@ export class NightSky {
     static skyObjects: SkyObject[] = [];
 
     static init() {
-        let h = document.createElement('div');
-        h.setAttribute('id', 'beepboop');
-        h.style.width = '100px';
-        h.style.height = '100px';
-        document.getElementById('diagnostic').appendChild(h);
-
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(parseInt(colors.sky, 16));
 

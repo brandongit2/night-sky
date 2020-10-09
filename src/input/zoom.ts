@@ -1,3 +1,4 @@
+import { DebugText } from '../debug/DebugText';
 import { NightSky } from '../NightSky';
 
 const minZoom = 0.3;
@@ -7,6 +8,7 @@ let scrollMin = Math.log(minZoom) / Math.log(1.003);
 let scrollMax = Math.log(maxZoom) / Math.log(1.003);
 let scrollOverlay: HTMLElement, scrollContent: HTMLElement;
 let initHeight: number;
+let debugText: DebugText;
 
 NightSky.attachToInitialization(() => {
     initHeight = window.innerHeight;
@@ -14,11 +16,15 @@ NightSky.attachToInitialization(() => {
     scrollContent = document.getElementById('scroll-content');
     scrollContent.style.height = scrollMax + window.innerHeight - scrollMin + 'px';
     scrollOverlay.scrollTo(0, scrollMax);
+
+    debugText = new DebugText('zoom', String(zoom));
 });
 
 NightSky.attachToRenderLoop(function () {
     zoom = scrollToZoom(scrollOverlay.scrollTop);
     this.camera.zoom = zoom;
+
+    debugText.update(String(zoom));
 });
 
 NightSky.attachToResizeEvent(() => {

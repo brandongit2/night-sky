@@ -1,7 +1,14 @@
+import * as d3 from 'd3';
+
 import { Inertia } from './Inertia';
 import { NightSky } from '../NightSky';
 import * as Pan from './pan';
 import { dist, midpoint } from '../util';
+
+interface ZoomLogFormat {
+    amt: number,
+    time: number
+}
 
 const panFactor = 0.0017;
 const zoomFactor = 1.2;
@@ -11,11 +18,17 @@ let panFinger: number;
 let lastPos: number[];
 let zoomFingers: number[];
 let lastDist: number;
-let zoomLog: Array<{ amt: number, time: number }> = [];
+let zoomLog: Array<ZoomLogFormat> = [];
+// let graph: d3.Selection<SVGPathElement, ZoomLogFormat[], HTMLElement, any>;
+// let y0: d3.Selection<SVGLineElement, unknown, HTMLElement, any>;
+// let xScale: d3.ScaleLinear<number, number>;
+// let yScale: d3.ScaleLinear<number, number>;
 
 let zoomInertia = new Inertia(1);
 
 function startPan(evt: TouchEvent) {
+    return;
+
     mode = 1;
     panFinger = evt.touches[0].identifier;
     lastPos = [evt.touches[0].clientX, evt.touches[0].clientY];
@@ -23,6 +36,8 @@ function startPan(evt: TouchEvent) {
 };
 
 function endPan() {
+    return;
+
     mode = 0;
     panFinger = undefined;
     lastPos = undefined;
@@ -44,8 +59,8 @@ function endZoom() {
     zoomFingers = undefined;
     lastDist = undefined;
 
-    zoomLog = zoomLog.filter(({ time: t }) => Date.now() - t < 70);
-    if (zoomLog.length <= 1 || zoomLog[zoomLog.length - 1].time - zoomLog[0].time === 0) return;
+    zoomLog = zoomLog.filter(({ time: t }) => Date.now() - t < 100);
+    if (zoomLog.length <= 1) return;
 
     let zoomSpeed = (zoomLog[zoomLog.length - 1].amt - zoomLog[0].amt)
         / (zoomLog[zoomLog.length - 1].time - zoomLog[0].time);
@@ -54,17 +69,51 @@ function endZoom() {
     zoomInertia.start(zoomSpeed, (delta) => { scrollOverlay.scrollBy(0, delta * 10); });
 };
 
-NightSky.attachToRenderLoop(() => {
+NightSky.attachToInitialization(function () {
     let scrollOverlay = document.getElementById('scroll-overlay');
     scrollOverlay.addEventListener('touchmove', (evt) => { evt.preventDefault() });
+
+    // let svg = d3.select('#zoom-graph');
+    // let svgWidth = +svg.style('width').replace('px', '');
+    // let svgHeight = +svg.style('height').replace('px', '');
+
+    // xScale = d3.scaleLinear()
+    //     .domain([Date.now() - 1000, Date.now()])
+    //     .range([0, svgWidth]);
+    // yScale = d3.scaleLinear()
+    //     .domain(d3.extent(zoomLog, (d: ZoomLogFormat) => d.amt))
+    //     .range([svgHeight, 0]);
+
+    // svg.append('line')
+    //     .attr('stroke', 'white')
+    //     .attr('x1', svgWidth - 100)
+    //     .attr('y1', 0)
+    //     .attr('x2', svgWidth - 100)
+    //     .attr('y2', svgHeight);
+
+    // y0 = svg.append('line')
+    //     .attr('stroke', 'white')
+    //     .attr('x1', 0)
+    //     .attr('y1', yScale(0))
+    //     .attr('x2', svgWidth)
+    //     .attr('y2', yScale(0));
+
+    // graph = svg.append('path')
+    //     .datum(zoomLog)
+    //     .attr('fill', 'none')
+    //     .attr('stroke', 'steelblue')
+    //     .attr('stroke-width', 1.5)
+    //     .attr('d', d3.line<ZoomLogFormat>()
+    //         .x((d: ZoomLogFormat) => xScale(d.time))
+    //         .y((d: ZoomLogFormat) => yScale(d.amt))
+    //     );
 
     window.addEventListener('touchstart', (evt) => {
         if (evt.touches.length === 1) {
             startPan.call(this, evt);
-            console.log('start pan');
         } else if (evt.touches.length === 2) {
+            zoomInertia.interrupt();
             startZoom.call(this, evt);
-            console.log('start zoom');
         }
     });
 
@@ -92,20 +141,33 @@ NightSky.attachToRenderLoop(() => {
             }
 
             zoomLog.push({
-                amt: prevAmt + (newDist - lastDist) * -zoomFactor,
+                amt: (newDist - lastDist) * -zoomFactor,
                 time: Date.now()
             });
             lastDist = newDist;
 
+            // xScale.domain([Date.now() - 1000, Date.now()]);
+            // yScale.domain(d3.extent(zoomLog, (d: ZoomLogFormat) => d.amt));
+            // graph.datum(zoomLog)
+            //     .attr('d', d3.line<ZoomLogFormat>()
+            //         .x((d: ZoomLogFormat) => xScale(d.time))
+            //         .y((d: ZoomLogFormat) => yScale(d.amt))
+            //     );
+
+            // y0.attr('x1', 0)
+            //     .attr('y1', yScale(0))
+            //     .attr('x2', svgWidth)
+            //     .attr('y2', yScale(0));
+
             // Panning continues in zoom mode using the midpoint of the two fingers.
-            let mid = midpoint([touch1.clientX, touch1.clientY], [touch2.clientX, touch2.clientY]);
-            Pan.pan.call(
-                this,
-                mid[0], mid[1],
-                (mid[1] - lastPos[1]) * panFactor,
-                (mid[0] - lastPos[0]) * panFactor
-            );
-            lastPos = mid;
+            // let mid = midpoint([touch1.clientX, touch1.clientY], [touch2.clientX, touch2.clientY]);
+            // Pan.pan.call(
+            //     this,
+            //     mid[0], mid[1],
+            //     (mid[1] - lastPos[1]) * panFactor,
+            //     (mid[0] - lastPos[0]) * panFactor
+            // );
+            // lastPos = mid;
         }
     });
 
