@@ -11,7 +11,7 @@ export class DebugGraph<T> extends DebugItem {
 
     constructor(
         key: string,
-        xAxisLabel: string, yAxisLabel: string,
+        xAxisLabel: string, yAxisLabel: string, // TODO
         xMin: number, xMax: number,
         yMin: number, yMax: number,
         data: T[],

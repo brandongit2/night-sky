@@ -1,6 +1,3 @@
-import * as d3 from 'd3';
-
-import { DebugGraph } from '../debug/DebugGraph';
 import { NightSky } from '../NightSky';
 import { dist, midpoint } from '../util';
 import { Inertia } from './Inertia';
@@ -21,10 +18,8 @@ let zoomFingers: number[];
 let lastDist: number;
 let zoomLog: Array<ZoomLogFormat> = [];
 let zoomVel: Array<ZoomLogFormat> = [];
-let zoomLogPerm: Array<ZoomLogFormat> = [];
-let graph: DebugGraph<ZoomLogFormat>;
 
-let zoomInertia = new Inertia(1);
+let zoomInertia = new Inertia();
 
 function startPan(evt: TouchEvent) {
     mode = 1;
@@ -67,8 +62,6 @@ function endZoom() {
 NightSky.attachToInitialization(function () {
     let scrollOverlay = document.getElementById('scroll-overlay');
     scrollOverlay.addEventListener('touchmove', (evt) => { evt.preventDefault() });
-
-    graph = new DebugGraph('a', 'x', 'y', 0, 5, 0, 5, [], f => f.time, f => f.amt);
 
     window.addEventListener('touchstart', (evt) => {
         if (evt.touches.length === 1) {
@@ -144,11 +137,4 @@ NightSky.attachToInitialization(function () {
             }
         }
     });
-});
-
-NightSky.attachToRenderLoop(function () {
-    zoomLogPerm.push({ amt: this.camera.zoom, time: Date.now() });
-    graph.update(zoomLogPerm, f => f.time, f => f.amt);
-    graph.updateDomainX([Date.now() - 2000, Date.now()]);
-    graph.updateDomainY(d3.extent(zoomLogPerm, (d: ZoomLogFormat) => d.amt));
 });
