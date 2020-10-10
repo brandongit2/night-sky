@@ -17,7 +17,7 @@ NightSky.attachToInitialization(() => {
     scrollContent.style.height = scrollMax + window.innerHeight - scrollMin + 'px';
     scrollOverlay.scrollTo(0, scrollMax);
 
-    debugText = new DebugText('zoom', String(zoom));
+    debugText = new DebugText('b', 'zoom', String(zoom));
 });
 
 NightSky.attachToRenderLoop(function () {

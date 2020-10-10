@@ -18,7 +18,7 @@ export class Inertia {
             let easing = Math.exp((-Date.now() + startTime) / 10000);
             easingLog.update(String(easing));
             velocityLog.update(String(velocity));
-            velocity *= easing;
+            // velocity *= easing;
 
             if (direction) {
                 if (velocity <= 0.01) {
@@ -42,6 +42,6 @@ export class Inertia {
 }
 
 NightSky.attachToInitialization(() => {
-    easingLog = new DebugText('easing', '0');
-    velocityLog = new DebugText('velocity', '0');
+    easingLog = new DebugText('d', 'easing', '0');
+    velocityLog = new DebugText('c', 'velocity', '0');
 })

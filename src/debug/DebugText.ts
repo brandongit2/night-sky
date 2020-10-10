@@ -1,9 +1,12 @@
 import { DebugItem } from './DebugItem';
 
 export class DebugText extends DebugItem {
-    constructor(name: string, text: string) {
-        super(name, 'p');
+    label: string;
 
+    constructor(key: string, label: string, text: string) {
+        super(key, 'p');
+
+        this.label = label;
         this.text = text;
     }
 
@@ -12,6 +15,6 @@ export class DebugText extends DebugItem {
     }
 
     private set text(text: string) {
-        this.domEl.innerHTML = `<b>${this.name}: </b>${text}`;
+        this.domEl.innerHTML = `<b>${this.label}: </b>${text}`;
     }
 }

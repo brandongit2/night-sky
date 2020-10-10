@@ -1,19 +1,37 @@
-export class DebugItem {
-    name: string;
-    domEl: HTMLElement;
-    logs: string[] = [];
+let i = 0; // Used to identify different logs.
 
-    constructor(name: string, elType: string) {
-        if (this.logs.hasOwnProperty(name)) {
-            throw new Error(`A debug element already exists with name "${name}".`);
-        } else {
-            this.logs.push(name);
+export class DebugItem {
+    static keys: { [key: string]: number } = {}; // Logs will be ordered alphabetically via these keys.
+    static keyOrder: string[] = [];
+
+    domEl: HTMLElement;
+
+    constructor(key: string, elType: string) {
+        this.domEl = document.createElement(elType);
+        this.domEl.setAttribute('id', `debug-${i}`);
+        DebugItem.keys[key] = i;
+        i++;
+
+        // Insert key into keyOrder alphabetically
+        let loc;
+        let elementAdded = false;
+        for (let [x, log] of DebugItem.keyOrder.entries()) {
+            if (key.localeCompare(log) === -1) {
+                DebugItem.keyOrder.splice(x, 0, key);
+                loc = x;
+                elementAdded = true;
+                break;
+            }
+        }
+        if (!elementAdded) {
+            DebugItem.keyOrder.push(key);
+            loc = DebugItem.keyOrder.length - 1;
         }
 
-        this.name = name;
-        this.domEl = document.createElement(elType);
-        this.domEl.setAttribute('id', `debug-${name}`);
-
-        document.getElementById('debug').appendChild(this.domEl);
+        if (!(loc === DebugItem.keyOrder.length - 1)) {
+            document.getElementById('debug').insertBefore(this.domEl, document.getElementById(`debug-${DebugItem.keys[DebugItem.keyOrder[loc + 1]]}`));
+        } else {
+            document.getElementById('debug').appendChild(this.domEl);
+        }
     }
 }
