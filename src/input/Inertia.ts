@@ -15,10 +15,10 @@ export class Inertia {
         let startTime = Date.now();
         let direction = velocity > 0;
         this.interval = setInterval(() => {
-            let easing = Math.exp((-Date.now() + startTime) / 10000);
+            let easing = Math.exp((-Date.now() + startTime) / 500);
             easingLog.update(String(easing));
             velocityLog.update(String(velocity));
-            // velocity *= easing;
+            velocity *= easing;
 
             if (direction) {
                 if (velocity <= 0.01) {

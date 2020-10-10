@@ -20,14 +20,13 @@ let lastPos: number[];
 let zoomFingers: number[];
 let lastDist: number;
 let zoomLog: Array<ZoomLogFormat> = [];
-let zoomLogPerm: Array<ZoomLogFormat> = []; // Permanent; for debug purposes
+let zoomVel: Array<ZoomLogFormat> = [];
+let zoomLogPerm: Array<ZoomLogFormat> = [];
 let graph: DebugGraph<ZoomLogFormat>;
 
 let zoomInertia = new Inertia(1);
 
 function startPan(evt: TouchEvent) {
-    return;
-
     mode = 1;
     panFinger = evt.touches[0].identifier;
     lastPos = [evt.touches[0].clientX, evt.touches[0].clientY];
@@ -35,8 +34,6 @@ function startPan(evt: TouchEvent) {
 };
 
 function endPan() {
-    return;
-
     mode = 0;
     panFinger = undefined;
     lastPos = undefined;
@@ -46,6 +43,7 @@ function endPan() {
 function startZoom(evt: TouchEvent) {
     mode = 2;
     zoomFingers = [evt.touches[0].identifier, evt.touches[1].identifier];
+    zoomVel = [];
     let touch1 = evt.touches[0];
     let touch2 = evt.touches[1];
     lastDist = dist([touch1.clientX, touch1.clientY], [touch2.clientX, touch2.clientY]);
@@ -57,11 +55,10 @@ function endZoom() {
     zoomFingers = undefined;
     lastDist = undefined;
 
-    zoomLog = zoomLog.filter(({ time: t }) => Date.now() - t < 100);
-    if (zoomLog.length <= 1) return;
+    zoomVel = zoomVel.filter(({ time: t }) => Date.now() - t < 70);
+    if (zoomVel.length <= 1) return;
 
-    let zoomSpeed = (zoomLog[zoomLog.length - 1].amt - zoomLog[0].amt)
-        / (zoomLog[zoomLog.length - 1].time - zoomLog[0].time);
+    let zoomSpeed = zoomVel.reduce((acc, cur) => acc + cur.amt, 0) / zoomVel.length;
 
     let scrollOverlay = document.getElementById('scroll-overlay');
     zoomInertia.start(zoomSpeed, (delta) => { scrollOverlay.scrollBy(0, delta * 10); });
@@ -109,7 +106,21 @@ NightSky.attachToInitialization(function () {
                 amt: (newDist - lastDist) * -zoomFactor,
                 time: Date.now()
             });
+            if (zoomLog.length > 1) zoomVel.push({
+                amt: (zoomLog[zoomLog.length - 1].amt + zoomLog[zoomLog.length - 2].amt) / (zoomLog[zoomLog.length - 1].time - zoomLog[zoomLog.length - 2].time),
+                time: Date.now()
+            });
             lastDist = newDist;
+
+            // Panning continues in zoom mode using the midpoint of the two fingers.
+            let mid = midpoint([touch1.clientX, touch1.clientY], [touch2.clientX, touch2.clientY]);
+            Pan.pan.call(
+                this,
+                mid[0], mid[1],
+                (mid[1] - lastPos[1]) * panFactor,
+                (mid[0] - lastPos[0]) * panFactor
+            );
+            lastPos = mid;
         }
     });
 
