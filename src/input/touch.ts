@@ -38,6 +38,7 @@ function endPan() {
 function startZoom(evt: TouchEvent) {
     mode = 2;
     zoomFingers = [evt.touches[0].identifier, evt.touches[1].identifier];
+    zoomLog = [];
     zoomVel = [];
     let touch1 = evt.touches[0];
     let touch2 = evt.touches[1];

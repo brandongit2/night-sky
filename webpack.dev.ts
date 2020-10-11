@@ -8,7 +8,7 @@ const config: webpack.Configuration = merge(common, {
     mode: 'development',
     devtool: 'inline-cheap-source-map',
     devServer: {
-        contentBase: './dist',
+        contentBase: path.join(__dirname, 'dist'),
         compress: true,
         port: 3000,
         host: '0.0.0.0',
@@ -18,7 +18,7 @@ const config: webpack.Configuration = merge(common, {
     output: {
         filename: '[name].[hash].js',
         chunkFilename: '[name].[hash].js',
-        path: path.resolve(__dirname, 'dist'),
+        path: path.resolve(__dirname, 'build'),
         publicPath: '/'
     }
 });

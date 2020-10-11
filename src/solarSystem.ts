@@ -1,17 +1,17 @@
-import { SphereGeometry, Mesh, MeshBasicMaterial, Vector3 } from 'three';
+import { TextureLoader, SpriteMaterial, Sprite } from 'three';
+import { DebugText } from './debug/DebugText';
 
 import { NightSky } from './NightSky';
-
-let starGeom = new SphereGeometry(0.1, 12);
-let starMat = new MeshBasicMaterial({ color: 0xffff00 });
-
-let stars = [[10, 0]];
+import { objects } from './objects.json';
 
 NightSky.attachToInitialization(function () {
-    for (let star of stars) {
-        let mesh = new Mesh(starGeom, starMat);
-        mesh.position.x = Math.sin(star[0]);
-        mesh.position.z = 1;
-        this.scene.add(mesh);
+    let spriteTex = new TextureLoader().load('star.png');
+    let spriteMaterial = new SpriteMaterial({ map: spriteTex });
+
+    for (let star of objects) {
+        let sprite = new Sprite(spriteMaterial);
+        sprite.scale.set(0.02, 0.02, 0.02);
+        sprite.position.setFromSphericalCoords(1, (90 - star.dec) * Math.PI / 180, (-star.ra + 180) * Math.PI / 180);
+        this.scene.add(sprite);
     }
 });
